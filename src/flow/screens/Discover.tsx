@@ -118,10 +118,10 @@ const styles = StyleSheet.create({
   pinDotBig: { backgroundColor: colors.terracotta },
   searchBar: {
     position: 'absolute',
-    top: 60,
-    left: 16,
+    top: 58,
+    left: 68,
     right: 16,
-    height: 46,
+    height: 42,
     backgroundColor: colors.card,
     borderRadius: 15,
     flexDirection: 'row',
