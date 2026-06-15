@@ -11,8 +11,25 @@ Rationale: in a market owned by Rover/Wag (utilitarian, transactional), a distin
 ## How we work (cadence)
 1. Pick **one** idea, smallest shippable slice.
 2. Build on the warm base → verify in the browser preview.
-3. Push to `main` → Vercel auto-deploys → test on iPhone via Expo Go.
+3. Push to `main` → Vercel auto-deploys → test on the **Vercel web URL** (no Expo Go / no local server).
 4. Iterate. Keep this file updated.
+
+## ✅ Shipped
+- 9-screen flow + sitter messaging (warm identity).
+- Live on Vercel via GitHub auto-deploy.
+- **Supabase**: sitter list loads from the `sitters` table (with static fallback). Client in
+  `flow/supabase.ts`, env in committed `.env` (public anon key, RLS read-only).
+
+## ⭐ Next action plan (agreed order)
+1. **Real map background — Mapbox Static Images API.** Replace the stylized map with a real
+   map *image* (works on web/Vercel, no native module, no dev build). Keep our animated
+   marker overlaid on top, same as today. Big visual upgrade, stays in our workflow.
+2. **AI post-walk report card (Claude).** At "Walk complete!", generate a warm recap from the
+   walk data (duration/distance/photos/mood). Call the Anthropic API from a **Supabase Edge
+   Function** so the API key stays server-side. Use **Haiku 4.5** (`claude-haiku-4-5`) for
+   cheap recaps, or **Opus 4.8** (`claude-opus-4-8`) for top quality. On-brand (warmth/trust),
+   something Rover doesn't have.
+3. Then continue down the trust pillar (health record, bookings table, real auth).
 
 ## Feature backlog (prioritized)
 
@@ -41,6 +58,29 @@ Rationale: in a market owned by Rover/Wag (utilitarian, transactional), a distin
 - [ ] **Premium placement** for sitters.
 - [ ] **Local community**: park meetups, lost-dog alerts (warm/local edge vs Rover).
 - [ ] **Tele-vet** consultation partnership.
+
+## Integrations & services (decision lens: does it work without a dev build, in the Vercel-web loop?)
+
+### Works NOW — pure JS / server-side, no dev build
+| Service | For | Effort |
+|---|---|---|
+| **Mapbox Static Images API** | Real map *image* background (Discover + live walk), marker overlaid on top | Low |
+| **Supabase Auth** | Real "Log in" (email / magic link) | Low |
+| **Supabase Realtime** | Live chat + live walk position | Low–Med |
+| **Supabase Storage** | Real photos (dog, walk) | Low |
+| **Claude API (Anthropic)** | AI walk report card, smart "good with anxious dogs" matching, support assistant — call via a Supabase Edge Function to keep the key server-side; Haiku 4.5 cheap / Opus 4.8 top | Med |
+| **Stripe (web Checkout)** | Pay for a booking | Med |
+| **Resend / Postmark** | Transactional email ("booking confirmed") via Edge Function | Low–Med |
+| **PostHog / Sentry** | Product analytics + error tracking | Low |
+
+### Needs a DEVELOPMENT BUILD (the "native" track, later)
+- **Interactive Mapbox / Apple / Google maps** (pan/zoom, live tiles). NB: native map modules
+  also **don't render on web** — would need a separate Mapbox GL JS impl for the Vercel preview.
+  → This is why we start with the **Static Images API** instead.
+- **Push notifications** (`expo-notifications`).
+- **Real background GPS** for genuine live-walk tracking (`expo-location` + task manager).
+- **Native Apple/Google sign-in**, **Stripe native payment sheet**.
+- **Liquid Glass** materials & true **SF Symbols**.
 
 ## Tech notes
 - Expo **SDK 56** (latest). Flow code in `flow/`, routes in `app/`.
