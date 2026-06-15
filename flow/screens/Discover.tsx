@@ -1,6 +1,6 @@
 import React from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SITTERS, Sitter } from '../data';
+import { Sitter } from '../data';
 import { Paw, Search, Star, Verified } from '../icons';
 import { colors, fonts, shadows } from '../theme';
 import { FloatingBack, ImageSlot, PrimaryButton } from '../ui';
@@ -8,11 +8,13 @@ import { FloatingBack, ImageSlot, PrimaryButton } from '../ui';
 const DESIGN_W = 322; // map coordinate space from proto.jsx
 
 export function Discover({
+  sitters,
   sitter,
   setSitter,
   go,
   back,
 }: {
+  sitters: Sitter[];
   sitter: Sitter;
   setSitter: (s: Sitter) => void;
   go: () => void;
@@ -36,7 +38,7 @@ export function Discover({
 
         <FloatingBack onPress={back} style={{ top: 58, left: 16 }} />
 
-        {SITTERS.map((p) => {
+        {sitters.map((p) => {
           const active = p.id === sitter.id;
           const big = !!p.big || active;
           const dim = big ? 42 : 32;
@@ -70,7 +72,7 @@ export function Discover({
 
       <View style={styles.sheet}>
         <View style={styles.grip} />
-        <Text style={styles.count}>{SITTERS.length} sitters available nearby</Text>
+        <Text style={styles.count}>{sitters.length} sitters available nearby</Text>
         <View style={styles.sitterCard}>
           <ImageSlot size={62} uri={sitter.avatar} />
           <View style={{ flex: 1, minWidth: 0 }}>

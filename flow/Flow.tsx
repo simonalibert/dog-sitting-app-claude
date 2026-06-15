@@ -16,6 +16,7 @@ import React from 'react';
 import { ActivityIndicator, Animated, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Booking, FlowForm, SITTERS, Sitter } from './data';
+import { fetchSitters } from './supabase';
 import { Booking as BookingScreen } from './screens/Booking';
 import { Chat } from './screens/Chat';
 import { Choice } from './screens/Choice';
@@ -54,6 +55,7 @@ export default function Flow() {
     tags: ['Playful', 'Good with other dogs'],
     photoUri: null,
   });
+  const [sitters, setSitters] = React.useState<Sitter[]>(SITTERS);
   const [sitter, setSitter] = React.useState<Sitter>(SITTERS[0]);
   const [booking, setBooking] = React.useState<Booking>({
     dow: 'Sat',
@@ -62,6 +64,14 @@ export default function Flow() {
     duration: 30,
     basePrice: SITTERS[0].price,
   });
+
+  // load sitters from Supabase (falls back to the static seed on error / no config)
+  React.useEffect(() => {
+    fetchSitters().then((rows) => {
+      setSitters(rows);
+      setSitter((cur) => rows.find((r) => r.id === cur.id) ?? rows[0]);
+    });
+  }, []);
 
   // keep basePrice in sync with the chosen sitter
   React.useEffect(() => {
@@ -134,7 +144,7 @@ export default function Flow() {
     0: <Welcome go={next} />,
     1: <Choice role={role} setRole={setRole} go={next} back={back} />,
     2: <Dog form={form} setForm={setForm} go={next} back={back} />,
-    3: <Discover sitter={sitter} setSitter={setSitter} go={next} back={back} />,
+    3: <Discover sitters={sitters} sitter={sitter} setSitter={setSitter} go={next} back={back} />,
     4: <SitterProfile sitter={sitter} form={form} go={next} back={back} />,
     5: <DateTime booking={booking} setBooking={setBooking} go={next} back={back} />,
     6: <BookingScreen form={form} sitter={sitter} booking={booking} go={next} back={back} />,
