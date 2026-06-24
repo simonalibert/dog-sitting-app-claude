@@ -16,14 +16,16 @@ Rationale: in a market owned by Rover/Wag (utilitarian, transactional), a distin
 
 ## ✅ Shipped
 - 9-screen flow + sitter messaging (warm identity).
-- Live on Vercel via GitHub auto-deploy.
+- Live on Vercel via GitHub auto-deploy (repo: `dog-sitting-app-claude`).
 - **Supabase**: sitter list loads from the `sitters` table (with static fallback). Client in
-  `flow/supabase.ts`, env in committed `.env` (public anon key, RLS read-only).
+  `flow/supabase.ts`.
+- **Real map background (Mapbox Static Images API)** on Discover + LiveWalk, pins/route
+  overlaid; falls back to the stylized map without a token. Helper in `flow/map.ts`.
+- **Secrets are env vars only** — `.env` is gitignored (kept locally); the 3 `EXPO_PUBLIC_*`
+  vars (Supabase URL/key, Mapbox token) are set in **Vercel → Settings → Environment Variables**.
 
-## ⭐ Next action plan (agreed order)
-1. **Real map background — Mapbox Static Images API.** Replace the stylized map with a real
-   map *image* (works on web/Vercel, no native module, no dev build). Keep our animated
-   marker overlaid on top, same as today. Big visual upgrade, stays in our workflow.
+## ⭐ Next action plan (updated order)
+1. ~~Real map background (Mapbox)~~ — ✅ done.
 2. **AI post-walk report card (Claude).** At "Walk complete!", generate a warm recap from the
    walk data (duration/distance/photos/mood). Call the Anthropic API from a **Supabase Edge
    Function** so the API key stays server-side. Use **Haiku 4.5** (`claude-haiku-4-5`) for
