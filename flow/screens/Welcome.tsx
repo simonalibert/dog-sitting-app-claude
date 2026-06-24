@@ -1,11 +1,21 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { HERO_DOG } from '../data';
 import { Paw } from '../icons';
 import { colors, fonts, type } from '../theme';
 import { ImageSlot, PrimaryButton } from '../ui';
 
-export function Welcome({ go }: { go: () => void }) {
+export function Welcome({
+  go,
+  userEmail,
+  onLogin,
+  onLogout,
+}: {
+  go: () => void;
+  userEmail?: string | null;
+  onLogin?: () => void;
+  onLogout?: () => void;
+}) {
   return (
     <View style={styles.screen}>
       {/* decorative paw field */}
@@ -30,9 +40,19 @@ export function Welcome({ go }: { go: () => void }) {
       </View>
       <View style={styles.foot}>
         <PrimaryButton title="Get started" onPress={go} />
-        <Text style={styles.mutedLine}>
-          Already have an account? <Text style={styles.link}>Log in</Text>
-        </Text>
+        {userEmail ? (
+          <Pressable onPress={onLogout}>
+            <Text style={styles.mutedLine}>
+              Signed in as <Text style={styles.linkInk}>{userEmail}</Text> · <Text style={styles.link}>Log out</Text>
+            </Text>
+          </Pressable>
+        ) : (
+          <Pressable onPress={onLogin}>
+            <Text style={styles.mutedLine}>
+              Already have an account? <Text style={styles.link}>Log in</Text>
+            </Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -51,4 +71,5 @@ const styles = StyleSheet.create({
   foot: { marginTop: 'auto' },
   mutedLine: { textAlign: 'center', color: colors.muted, fontSize: 13.5, marginTop: 14, fontFamily: fonts.body600 },
   link: { color: colors.terracotta600, fontFamily: fonts.body800 },
+  linkInk: { color: colors.ink, fontFamily: fonts.body800 },
 });

@@ -16,7 +16,8 @@ import React from 'react';
 import { ActivityIndicator, Animated, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Booking, FlowForm, SITTERS, Sitter } from './data';
-import { createBooking, fetchSitters } from './supabase';
+import { createBooking, fetchSitters, signOut, supabase } from './supabase';
+import { Auth } from './screens/Auth';
 import { Booking as BookingScreen } from './screens/Booking';
 import { Chat } from './screens/Chat';
 import { Choice } from './screens/Choice';
@@ -65,12 +66,25 @@ export default function Flow() {
     basePrice: SITTERS[0].price,
   });
 
+  // current auth user (email or null)
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
+
   // load sitters from Supabase (falls back to the static seed on error / no config)
   React.useEffect(() => {
     fetchSitters().then((rows) => {
       setSitters(rows);
       setSitter((cur) => rows.find((r) => r.id === cur.id) ?? rows[0]);
     });
+  }, []);
+
+  // track auth session
+  React.useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => setUserEmail(data.session?.user?.email ?? null));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   // keep basePrice in sync with the chosen sitter
@@ -101,6 +115,19 @@ export default function Flow() {
   const closeChat = () => {
     Animated.timing(chatAnim, { toValue: 0, duration: 260, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(({ finished }) => {
       if (finished) setChatMounted(false);
+    });
+  };
+
+  // auth modal overlay (slides up from the bottom)
+  const [authMounted, setAuthMounted] = React.useState(false);
+  const authAnim = React.useRef(new Animated.Value(0)).current;
+  const openAuth = () => {
+    setAuthMounted(true);
+    Animated.timing(authAnim, { toValue: 1, duration: 300, easing: Easing.bezier(0.22, 0.61, 0.36, 1), useNativeDriver: true }).start();
+  };
+  const closeAuth = () => {
+    Animated.timing(authAnim, { toValue: 0, duration: 260, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(({ finished }) => {
+      if (finished) setAuthMounted(false);
     });
   };
 
@@ -141,7 +168,7 @@ export default function Flow() {
   const outOpacity = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
 
   const screens: Record<number, React.ReactNode> = {
-    0: <Welcome go={next} />,
+    0: <Welcome go={next} userEmail={userEmail} onLogin={openAuth} onLogout={signOut} />,
     1: <Choice role={role} setRole={setRole} go={next} back={back} />,
     2: <Dog form={form} setForm={setForm} go={next} back={back} />,
     3: <Discover sitters={sitters} sitter={sitter} setSitter={setSitter} go={next} back={back} />,
@@ -165,6 +192,7 @@ export default function Flow() {
   };
 
   const chatTranslateY = chatAnim.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
+  const authTranslateY = authAnim.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -181,6 +209,11 @@ export default function Flow() {
       {chatMounted && (
         <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: chatTranslateY }] }]}>
           <Chat sitter={sitter} form={form} onClose={closeChat} />
+        </Animated.View>
+      )}
+      {authMounted && (
+        <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: authTranslateY }] }]}>
+          <Auth onClose={closeAuth} onSignedIn={closeAuth} />
         </Animated.View>
       )}
     </SafeAreaView>
