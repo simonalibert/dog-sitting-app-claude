@@ -1,9 +1,12 @@
 import React from 'react';
-import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Sitter } from '../data';
 import { Paw, Search, Star, Verified } from '../icons';
+import { staticMapUrl } from '../map';
 import { colors, fonts, shadows } from '../theme';
 import { FloatingBack, ImageSlot, PrimaryButton } from '../ui';
+
+const MAP_IMG = staticMapUrl({ zoom: 14.2 });
 
 const DESIGN_W = 322; // map coordinate space from proto.jsx
 
@@ -27,14 +30,21 @@ export function Discover({
   return (
     <View style={styles.screen}>
       <View style={styles.map} onLayout={onLayout}>
-        {/* stylized streets / parks / water */}
-        <View style={[styles.street, { top: 70 * s, left: -40 * s, width: 420 * s, transform: [{ rotate: '-8deg' }] }]} />
-        <View style={[styles.street, { top: 200 * s, left: -40 * s, width: 420 * s, transform: [{ rotate: '6deg' }] }]} />
-        <View style={[styles.streetV, { left: 110 * s, top: -40 * s, height: 520 * s, transform: [{ rotate: '4deg' }] }]} />
-        <View style={[styles.streetV, { left: 240 * s, top: -40 * s, height: 520 * s, transform: [{ rotate: '-3deg' }] }]} />
-        <View style={[styles.park, { left: 150 * s, top: 96 * s, width: 70 * s, height: 70 * s }]} />
-        <View style={[styles.park, { left: 24 * s, top: 150 * s, width: 60 * s, height: 46 * s }]} />
-        <View style={[styles.water, { left: 200 * s, top: 220 * s, width: 130 * s, height: 150 * s }]} />
+        {MAP_IMG ? (
+          // real map background (Mapbox static image)
+          <Image source={{ uri: MAP_IMG }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        ) : (
+          // fallback: stylized streets / parks / water
+          <>
+            <View style={[styles.street, { top: 70 * s, left: -40 * s, width: 420 * s, transform: [{ rotate: '-8deg' }] }]} />
+            <View style={[styles.street, { top: 200 * s, left: -40 * s, width: 420 * s, transform: [{ rotate: '6deg' }] }]} />
+            <View style={[styles.streetV, { left: 110 * s, top: -40 * s, height: 520 * s, transform: [{ rotate: '4deg' }] }]} />
+            <View style={[styles.streetV, { left: 240 * s, top: -40 * s, height: 520 * s, transform: [{ rotate: '-3deg' }] }]} />
+            <View style={[styles.park, { left: 150 * s, top: 96 * s, width: 70 * s, height: 70 * s }]} />
+            <View style={[styles.park, { left: 24 * s, top: 150 * s, width: 60 * s, height: 46 * s }]} />
+            <View style={[styles.water, { left: 200 * s, top: 220 * s, width: 130 * s, height: 150 * s }]} />
+          </>
+        )}
 
         <FloatingBack onPress={back} style={{ top: 58, left: 16 }} />
 

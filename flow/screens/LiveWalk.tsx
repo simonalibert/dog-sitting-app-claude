@@ -1,10 +1,13 @@
 import React from 'react';
-import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
+import { Image, LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { Booking, FlowForm, Sitter, WALK_PHOTO } from '../data';
 import { Check, Msg, Paw, Verified } from '../icons';
+import { staticMapUrl } from '../map';
 import { colors, fonts, shadows } from '../theme';
 import { ImageSlot, PrimaryButton } from '../ui';
+
+const MAP_IMG = staticMapUrl({ zoom: 14.6 });
 
 const ROUTE = 'M58,116 C150,90 104,198 196,198 C258,198 280,262 184,298 C122,324 152,366 100,350';
 const VB_W = 322;
@@ -121,6 +124,7 @@ export function LiveWalk({
   return (
     <View style={styles.screen}>
       <View style={styles.map} onLayout={onMap}>
+        {MAP_IMG && <Image source={{ uri: MAP_IMG }} style={StyleSheet.absoluteFill} resizeMode="cover" />}
         <Svg width="100%" height="100%" viewBox={`0 0 ${VB_W} ${VB_H}`} preserveAspectRatio="xMidYMid meet" style={StyleSheet.absoluteFill}>
           <Path d={ROUTE} fill="none" stroke="#E0D4BE" strokeWidth={7} strokeLinecap="round" />
           <Path
