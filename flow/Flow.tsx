@@ -16,7 +16,7 @@ import React from 'react';
 import { ActivityIndicator, Animated, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Booking, FlowForm, SITTERS, Sitter } from './data';
-import { fetchSitters } from './supabase';
+import { createBooking, fetchSitters } from './supabase';
 import { Booking as BookingScreen } from './screens/Booking';
 import { Chat } from './screens/Chat';
 import { Choice } from './screens/Choice';
@@ -147,7 +147,19 @@ export default function Flow() {
     3: <Discover sitters={sitters} sitter={sitter} setSitter={setSitter} go={next} back={back} />,
     4: <SitterProfile sitter={sitter} form={form} go={next} back={back} />,
     5: <DateTime booking={booking} setBooking={setBooking} go={next} back={back} />,
-    6: <BookingScreen form={form} sitter={sitter} booking={booking} go={next} back={back} />,
+    6: (
+      <BookingScreen
+        form={form}
+        sitter={sitter}
+        booking={booking}
+        go={() => {
+          // persist the booking (best-effort, non-blocking) then show success
+          createBooking(sitter, form, booking);
+          next();
+        }}
+        back={back}
+      />
+    ),
     7: <Success form={form} sitter={sitter} booking={booking} track={() => go(8)} restart={restart} />,
     8: <LiveWalk sitter={sitter} form={form} booking={booking} back={() => go(7)} restart={restart} onMessage={openChat} />,
   };

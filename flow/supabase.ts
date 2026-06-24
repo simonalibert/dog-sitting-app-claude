@@ -1,6 +1,6 @@
 import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
-import { SITTERS, Sitter } from './data';
+import { Booking, FlowForm, SITTERS, Sitter } from './data';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const anon = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -19,5 +19,27 @@ export async function fetchSitters(): Promise<Sitter[]> {
     return data as Sitter[];
   } catch {
     return SITTERS;
+  }
+}
+
+/** Persist a confirmed booking. Best-effort: never throws, so the success screen always shows. */
+export async function createBooking(sitter: Sitter, form: FlowForm, booking: Booking): Promise<boolean> {
+  if (!supabase) return false;
+  const total = booking.duration === 60 ? booking.basePrice + 12 : booking.basePrice;
+  try {
+    const { error } = await supabase.from('bookings').insert({
+      sitter_id: sitter.id,
+      sitter_name: sitter.name,
+      dog_name: form.name,
+      dog_breed: form.breed,
+      dow: booking.dow,
+      day: booking.day,
+      time: booking.time,
+      duration: booking.duration,
+      total,
+    });
+    return !error;
+  } catch {
+    return false;
   }
 }
