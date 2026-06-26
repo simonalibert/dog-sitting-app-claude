@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { HERO_DOG } from '../data';
 import { Paw } from '../icons';
-import { colors, fonts, type } from '../theme';
+import { colors, fonts, shadows, type } from '../theme';
 import { ImageSlot, PrimaryButton } from '../ui';
 
 export function Welcome({
@@ -10,11 +10,13 @@ export function Welcome({
   userEmail,
   onLogin,
   onLogout,
+  onMyWalks,
 }: {
   go: () => void;
   userEmail?: string | null;
   onLogin?: () => void;
   onLogout?: () => void;
+  onMyWalks?: () => void;
 }) {
   return (
     <View style={styles.screen}>
@@ -41,11 +43,16 @@ export function Welcome({
       <View style={styles.foot}>
         <PrimaryButton title="Get started" onPress={go} />
         {userEmail ? (
-          <Pressable onPress={onLogout}>
-            <Text style={styles.mutedLine}>
-              Signed in as <Text style={styles.linkInk}>{userEmail}</Text> · <Text style={styles.link}>Log out</Text>
-            </Text>
-          </Pressable>
+          <View>
+            <Pressable onPress={onMyWalks} style={styles.walksBtn}>
+              <Text style={styles.walksBtnText}>My walks</Text>
+            </Pressable>
+            <Pressable onPress={onLogout}>
+              <Text style={styles.mutedLine}>
+                Signed in as <Text style={styles.linkInk}>{userEmail}</Text> · <Text style={styles.link}>Log out</Text>
+              </Text>
+            </Pressable>
+          </View>
         ) : (
           <Pressable onPress={onLogin}>
             <Text style={styles.mutedLine}>
@@ -72,4 +79,16 @@ const styles = StyleSheet.create({
   mutedLine: { textAlign: 'center', color: colors.muted, fontSize: 13.5, marginTop: 14, fontFamily: fonts.body600 },
   link: { color: colors.terracotta600, fontFamily: fonts.body800 },
   linkInk: { color: colors.ink, fontFamily: fonts.body800 },
+  walksBtn: {
+    height: 48,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: colors.line,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    ...shadows.soft,
+  },
+  walksBtnText: { fontFamily: fonts.body800, fontSize: 15, color: colors.terracotta600 },
 });

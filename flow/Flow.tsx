@@ -25,6 +25,7 @@ import { DateTime } from './screens/DateTime';
 import { Discover } from './screens/Discover';
 import { Dog } from './screens/Dog';
 import { LiveWalk } from './screens/LiveWalk';
+import { MyWalks } from './screens/MyWalks';
 import { SitterProfile } from './screens/SitterProfile';
 import { Success } from './screens/Success';
 import { Welcome } from './screens/Welcome';
@@ -131,6 +132,19 @@ export default function Flow() {
     });
   };
 
+  // "My walks" modal overlay (slides up from the bottom)
+  const [walksMounted, setWalksMounted] = React.useState(false);
+  const walksAnim = React.useRef(new Animated.Value(0)).current;
+  const openWalks = () => {
+    setWalksMounted(true);
+    Animated.timing(walksAnim, { toValue: 1, duration: 300, easing: Easing.bezier(0.22, 0.61, 0.36, 1), useNativeDriver: true }).start();
+  };
+  const closeWalks = () => {
+    Animated.timing(walksAnim, { toValue: 0, duration: 260, easing: Easing.in(Easing.cubic), useNativeDriver: true }).start(({ finished }) => {
+      if (finished) setWalksMounted(false);
+    });
+  };
+
   // two-layer push transition: incoming slides in, outgoing parallaxes out + fades.
   const anim = React.useRef(new Animated.Value(1)).current;
   const prevStepRef = React.useRef(step);
@@ -168,7 +182,7 @@ export default function Flow() {
   const outOpacity = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
 
   const screens: Record<number, React.ReactNode> = {
-    0: <Welcome go={next} userEmail={userEmail} onLogin={openAuth} onLogout={signOut} />,
+    0: <Welcome go={next} userEmail={userEmail} onLogin={openAuth} onLogout={signOut} onMyWalks={openWalks} />,
     1: <Choice role={role} setRole={setRole} go={next} back={back} />,
     2: <Dog form={form} setForm={setForm} go={next} back={back} />,
     3: <Discover sitters={sitters} sitter={sitter} setSitter={setSitter} go={next} back={back} />,
@@ -193,6 +207,7 @@ export default function Flow() {
 
   const chatTranslateY = chatAnim.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
   const authTranslateY = authAnim.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
+  const walksTranslateY = walksAnim.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
 
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -214,6 +229,11 @@ export default function Flow() {
       {authMounted && (
         <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: authTranslateY }] }]}>
           <Auth onClose={closeAuth} onSignedIn={closeAuth} />
+        </Animated.View>
+      )}
+      {walksMounted && (
+        <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateY: walksTranslateY }] }]}>
+          <MyWalks onClose={closeWalks} />
         </Animated.View>
       )}
     </SafeAreaView>

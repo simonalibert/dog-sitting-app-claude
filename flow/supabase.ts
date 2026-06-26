@@ -43,6 +43,41 @@ export async function signOut(): Promise<void> {
   await supabase?.auth.signOut();
 }
 
+// ---- My walks (bookings owned by the signed-in user; RLS scopes reads) ----
+export type BookingRow = {
+  id: string;
+  created_at: string;
+  sitter_name: string;
+  dog_name: string;
+  dog_breed: string | null;
+  dow: string;
+  day: number;
+  time: string;
+  duration: number;
+  total: number;
+};
+
+export async function fetchMyBookings(): Promise<BookingRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
+  if (error || !data) return [];
+  return data as BookingRow[];
+}
+
+/** Subscribe to live INSERTs on bookings (RLS already scopes to the owner). Returns an unsubscribe fn. */
+export function subscribeMyBookings(onInsert: (row: BookingRow) => void): () => void {
+  if (!supabase) return () => {};
+  const channel = supabase
+    .channel('my-bookings')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, (payload) => {
+      onInsert(payload.new as BookingRow);
+    })
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
 /** Fetch sitters from Supabase; falls back to the static seed on any error / missing config. */
 export async function fetchSitters(): Promise<Sitter[]> {
   if (!supabase) return SITTERS;
