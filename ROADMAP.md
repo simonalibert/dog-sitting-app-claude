@@ -23,6 +23,12 @@ Rationale: in a market owned by Rover/Wag (utilitarian, transactional), a distin
   overlaid; falls back to the stylized map without a token. Helper in `flow/map.ts`.
 - **Bookings persisted to Supabase** — `bookings` table; `createBooking()` inserts on
   "Confirm booking" (best-effort, non-blocking). Sitter list also loads from `sitters`.
+- **Auth (Supabase email/password)** — sign in / sign up overlay from Welcome; session
+  persisted (AsyncStorage); Welcome shows the signed-in email + Log out. Web is SPA
+  (`web.output: "single"`).
+- **Live "My walks"** — bookings scoped to the signed-in user (`user_id` default
+  `auth.uid()`, RLS owner-read); MyWalks overlay subscribes to Supabase **Realtime** so
+  new bookings appear live (terracotta flash).
 - **Secrets are env vars only** — `.env` is gitignored (kept locally); the 3 `EXPO_PUBLIC_*`
   vars (Supabase URL/key, Mapbox token) are set in **Vercel → Settings → Environment Variables**.
 
